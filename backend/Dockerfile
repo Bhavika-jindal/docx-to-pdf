@@ -1,18 +1,18 @@
-# Use the official Python image as the base
+# Use official Python image from DockerHub
 FROM python:3.9-slim
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
-COPY requirements.txt .
+# Install dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application files
-COPY . .
+# Copy the entire Streamlit app code into the container
+COPY . /app/
 
-# Expose the port the Flask app runs on
-EXPOSE 5000
+# Expose the port that Streamlit will run on
+EXPOSE 8501
 
-# Run the Flask app
-CMD ["python", "app.py"]
+# Command to run the Streamlit app
+CMD ["streamlit", "run", "streamlit_app.py"]
