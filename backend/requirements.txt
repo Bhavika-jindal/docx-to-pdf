@@ -2,7 +2,7 @@ streamlit==1.20.0
 Flask==2.2.5
 Flask-Cors==3.0.10
 python-docx==0.8.11
-reportlab==3.6.12
+reportlab==3.6.12 --only-binary :all:
 
 werkzeug==2.2.3
 markupsafe==2.1.3
