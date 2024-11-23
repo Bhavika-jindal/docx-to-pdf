@@ -1,9 +1,15 @@
-streamlit==1.20.0
-Flask==2.2.5
-Flask-Cors==3.0.10
-python-docx==0.8.11
-reportlab==3.6.12 --only-binary :all:
+# Streamlit - for the frontend UI
+streamlit
 
-werkzeug==2.2.3
-markupsafe==2.1.3
-Jinja2==3.1.2
+# Flask - for the backend API
+Flask
+Flask-Cors
+
+# Libraries for processing .docx and generating PDFs
+python-docx
+reportlab
+
+# Werkzeug and related libraries (required for Flask)
+werkzeug
+markupsafe
+Jinja2
