@@ -4,12 +4,10 @@ from docx import Document
 from reportlab.pdfgen import canvas
 import os
 
-
 app = Flask(__name__)
 
 # CORS Configuration to allow frontend to interact with the backend
-CORS(app, resources={r"/upload": {"origins": "http://localhost:3000"}})
-
+CORS(app, resources={r"/upload": {"origins": "http://localhost:8501"}})  # Update for Streamlit's default port
 
 # Ensure the uploads folder exists
 UPLOAD_FOLDER = 'uploads'
@@ -17,8 +15,6 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
 
 # Increase the maximum content length to 16MB for file uploads
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
@@ -33,32 +29,30 @@ def favicon():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("Request files:", request.files)  # Debugging to print the files sent in the request
-
     if 'file' not in request.files:
-        print("No file found in the request")
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files['file']
-    print(f"File received: {file.filename}")  # Confirm the file is received
     if file.filename == '' or not file.filename.endswith('.docx'):
-        print("Invalid file format or empty filename")
-        return jsonify({"error": "Invalid file format"}), 400
+        return jsonify({"error": "Invalid file format. Only .docx files are allowed."}), 400
 
     temp_doc_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(temp_doc_path)
-    print(f"File saved at: {temp_doc_path}")
 
+    # Extract metadata from the docx file
     metadata = extract_metadata(temp_doc_path)
+
+    # Convert to PDF
     pdf_path = convert_to_pdf(temp_doc_path)
 
+    # Return metadata and download link for the generated PDF
+    download_link = f"http://localhost:5000/download/{os.path.basename(pdf_path)}"
+
     return jsonify({
-        "message": "File uploaded successfully",
+        "message": "File uploaded and converted successfully",
         "metadata": metadata,
-        "pdf_path": pdf_path
+        "download_link": download_link
     })
-
-
 
 def extract_metadata(file_path):
     doc = Document(file_path)
@@ -92,4 +86,3 @@ def download_pdf(filename):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
