@@ -1,21 +1,35 @@
-version: "3.8"
+# Use an official Python runtime as the base image
+FROM python:3.10-slim
 
-services:
-  backend:
-    build:
-      context: ./backend   # Ensure this path points to the backend folder
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./backend:/app
-    depends_on:
-      - frontend
+# Set environment variables to avoid writing bytecode
+ENV PYTHONUNBUFFERED 1
 
-  frontend:
-    build:
-      context: ./frontend/frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend/frontend:/app
+# Install system dependencies that are needed by 'reportlab' and other dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    libfreetype6-dev \
+    libxml2-dev \
+    libssl-dev \
+    libffi-dev \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
+# Create and set the working directory
+WORKDIR /app
+
+# Copy requirements.txt to the container
+COPY requirements.txt /app/
+
+# Install Python dependencies
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Copy the rest of the application code
+COPY . /app/
+
+# Expose the port on which Streamlit will run
+EXPOSE 8501
+
+# Command to run Streamlit app
+CMD ["streamlit", "run", "backend/streamlit_app.py"]
